@@ -11,14 +11,14 @@ You can find the website and user documentation at http://easymock.org.
 # Developer information
 
 ## Build status
-[![Build Status](https://travis-ci.org/easymock/easymock.svg?branch=master)](https://travis-ci.org/easymock/easymock)
+[![Build Status](https://github.com/easymock/easymock/actions/workflows/ci.yml/badge.svg)](https://github.com/easymock/easymock/actions/workflows/ci.yml?query=branch%3Amaster)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.easymock/easymock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.easymock/easymock)
 
 ## Environment setup
 
 I'm using:
-- IntelliJ 2020.3 Ultimate (thanks to JetBrains for the license)
-- Maven 3.6.3
+- IntelliJ 2023.2.1 Ultimate (thanks to JetBrains for the license)
+- Maven 3.9.2
 
 You can also use Eclipse. I tried
 - Eclipse 2020.12 (but there was a weird compilation issue with ASM)
@@ -98,6 +98,10 @@ The command line will ask you to give the passphrase for the gpg private key.
 
 `mvn validate license:format -Pall`
 
+## To upgrade the Maven wrapper
+
+`mvn wrapper:wrapper`
+
 ## To run Sonar
 
 `mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar`
@@ -121,8 +125,8 @@ The command line will ask you to give the passphrase for the gpg private key.
 - Make sure `jq` is installed. If not, install it with your favorite package manager (`brew install jq`, `choco install jq`, `apt-get install jq`, `yum install jq`, etc.).
 - If gpg gives an `Inappropriate ioctl for device` error, enter this in your shell: `export GPG_TTY=$(tty)`
 - Add a little speech on the features in "ReleaseNotes.md" (remove the Change Log part, which will be regenerated automatically)
-- Set the github_user, github_password, gpg_passphrase as environment variables
-- Launch ./deploy-easymock.sh version
+- Set the gpg_passphrase as environment variables
+- Launch `./deploy-easymock.sh (major|minor|patch)` where the parameter tells which version number should be incremented at the end
 - During the deployment, you will be asked to do different things. Do them
 - Announce to gitter, tweet and blog ;-)
 

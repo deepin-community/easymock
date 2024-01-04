@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 package org.easymock.tests;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author OFFIS, Tammo Freese
@@ -28,7 +28,7 @@ public class RecordStateInvalidUsageTest {
 
     private IMethods mock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         mock = createMock(IMethods.class);
     }
@@ -37,9 +37,9 @@ public class RecordStateInvalidUsageTest {
     public void notAMockPassedToExpect() {
         try {
             expect(null);
-            fail("IllegalStateException expected");
+            Assertions.fail("IllegalStateException expected");
         } catch (IllegalStateException expected) {
-            assertEquals("no last call on a mock available", expected.getMessage());
+            Assertions.assertEquals("no last call on a mock available", expected.getMessage());
         }
     }
 
@@ -47,9 +47,9 @@ public class RecordStateInvalidUsageTest {
     public void openVoidCallCountWithoutMethodCall() {
         try {
             expectLastCall();
-            fail("IllegalStateException expected");
+            Assertions.fail("IllegalStateException expected");
         } catch (IllegalStateException expected) {
-            assertEquals("no last call on a mock available", expected.getMessage());
+            Assertions.assertEquals("no last call on a mock available", expected.getMessage());
         }
     }
 
@@ -57,9 +57,9 @@ public class RecordStateInvalidUsageTest {
     public void setWrongReturnValueBoolean() {
         try {
             expect((Object) mock.oneArg(false)).andReturn(false);
-            fail("IllegalStateException expected");
+            Assertions.fail("IllegalStateException expected");
         } catch (IllegalStateException expected) {
-            assertEquals("incompatible return value type", expected.getMessage());
+            Assertions.assertEquals("incompatible return value type", expected.getMessage());
         }
     }
 }

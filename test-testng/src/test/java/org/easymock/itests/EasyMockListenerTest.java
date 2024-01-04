@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2021 the original author or authors.
+ * Copyright 2010-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,9 @@ public class EasyMockListenerTest extends EasyMockSupport {
         assertEquals("1", standardMock.oneArg(true));
         assertEquals("2", namedMock.oneArg(true));
         verifyAll();
-        assertEquals("EasyMock for interface org.easymock.itests.IMethods", standardMock.toString());
+        assertEquals("EasyMock for field org.easymock.itests.EasyMockListenerTest.standardMock", standardMock.toString());
         assertEquals("name1", namedMock.toString());
-        assertEquals("EasyMock for interface org.easymock.itests.IMethods", typedMock.toString());
+        assertEquals("EasyMock for field org.easymock.itests.EasyMockListenerTest.typedMock", typedMock.toString());
         assertEquals("name2", namedAndTypedMock.toString());
     }
 

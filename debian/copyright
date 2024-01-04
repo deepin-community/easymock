@@ -8,7 +8,7 @@ Files-Excluded:
  .gitignore
 
 Files: *
-Copyright: 2001-2021, OFFIS, Tammo Freese, Henri Tremblay
+Copyright: 2001-2023, OFFIS, Tammo Freese, Henri Tremblay
 License: Apache-2.0
 
 Files: debian/*
@@ -16,7 +16,7 @@ Copyright: 2007-2009, Jan-Pascal van Best <janpascal@vanbest.org>
            2009,      Damien Raude-Morvan <drazzib@debian.org>
            2010-2011, Torsten Werner <twerner@debian.org>
            2012,      Niels Thykier <niels@thykier.net>
-           2013-2021, Markus Koschany <apo@debian.org>
+           2013-2023, Markus Koschany <apo@debian.org>
 License: Apache-2.0
 
 License: Apache-2.0

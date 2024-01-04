@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.Serializable;
 import org.easymock.IArgumentMatcher;
 
 /**
+ * Matches if the argument is a string ending with a given suffix.
+ *
  * @author OFFIS, Tammo Freese
  */
 public class EndsWith implements IArgumentMatcher, Serializable {
@@ -32,10 +34,12 @@ public class EndsWith implements IArgumentMatcher, Serializable {
         this.suffix = suffix;
     }
 
+    @Override
     public boolean matches(Object actual) {
         return (actual instanceof String) && ((String) actual).endsWith(suffix);
     }
 
+    @Override
     public void appendTo(StringBuffer buffer) {
         buffer.append("endsWith(\"").append(suffix).append("\")");
     }

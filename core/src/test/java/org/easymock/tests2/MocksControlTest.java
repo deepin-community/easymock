@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@ package org.easymock.tests2;
 
 import org.easymock.ConstructorArgs;
 import org.easymock.IMocksControl;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,13 +79,13 @@ public class MocksControlTest {
         A a = ctrl.createMock(null, A.class, null, A.class.getMethod("bar"), A.class.getMethod(
                 "toString"));
 
-        assertEquals("No constructor called so should not be initialized", 0, a.i);
+        Assertions.assertEquals(0, a.i, "No constructor called so should not be initialized");
         expect(a.bar()).andReturn(5);
         replay(a);
-        assertEquals("foo isn't mocked so it will call bar which return 5", 5, a.foo());
+        Assertions.assertEquals(5, a.foo(), "foo isn't mocked so it will call bar which return 5");
         verify(a);
 
-        assertEquals("EasyMock for class org.easymock.tests2.MocksControlTest$A", a.toString());
+        Assertions.assertEquals("EasyMock for class org.easymock.tests2.MocksControlTest$A", a.toString());
     }
 
     @Test
@@ -93,13 +94,13 @@ public class MocksControlTest {
         A a = ctrl.createMock("myMock", A.class, null, A.class.getMethod("bar"), A.class
                 .getMethod("toString"));
 
-        assertEquals("No constructor called so should not be initialized", 0, a.i);
+        Assertions.assertEquals(0, a.i, "No constructor called so should not be initialized");
         expect(a.bar()).andReturn(5);
         replay(a);
-        assertEquals("foo isn't mocked so it will call bar which return 5", 5, a.foo());
+        Assertions.assertEquals(5, a.foo(), "foo isn't mocked so it will call bar which return 5");
         verify(a);
 
-        assertEquals("myMock", a.toString());
+        Assertions.assertEquals("myMock", a.toString());
     }
 
     @Test
@@ -111,13 +112,13 @@ public class MocksControlTest {
         A a = ctrl.createMock(null, A.class, args, A.class.getMethod("bar"), A.class.getMethod(
                 "toString"));
 
-        assertEquals("Constructor called so should be initialized", 6, a.i);
+        Assertions.assertEquals(6, a.i, "Constructor called so should be initialized");
         expect(a.bar()).andReturn(5);
         replay(a);
-        assertEquals("foo isn't mocked so it will call bar which return 5", 5, a.foo());
+        Assertions.assertEquals(5, a.foo(), "foo isn't mocked so it will call bar which return 5");
         verify(a);
 
-        assertEquals("EasyMock for class org.easymock.tests2.MocksControlTest$A", a.toString());
+        Assertions.assertEquals("EasyMock for class org.easymock.tests2.MocksControlTest$A", a.toString());
     }
 
     @Test
@@ -129,19 +130,19 @@ public class MocksControlTest {
         A a = ctrl.createMock("myMock", A.class, args, A.class.getMethod("bar"), A.class
                 .getMethod("toString"));
 
-        assertEquals("Constructor called so should be initialized", 6, a.i);
+        Assertions.assertEquals(6, a.i, "Constructor called so should be initialized");
         expect(a.bar()).andReturn(5);
         replay(a);
-        assertEquals("foo isn't mocked so it will call bar which return 5", 5, a.foo());
+        Assertions.assertEquals(5, a.foo(), "foo isn't mocked so it will call bar which return 5");
         verify(a);
 
-        assertEquals("myMock", a.toString());
+        Assertions.assertEquals("myMock", a.toString());
     }
 
     private void testList(IMocksControl ctrl, List<?> list) {
         expect(list.size()).andReturn(3);
         ctrl.replay();
-        assertEquals(3, list.size());
+        Assertions.assertEquals(3, list.size());
         ctrl.verify();
     }
 

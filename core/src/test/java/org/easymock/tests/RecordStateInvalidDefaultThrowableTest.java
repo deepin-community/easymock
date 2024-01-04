@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 package org.easymock.tests;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author OFFIS, Tammo Freese
@@ -34,7 +34,7 @@ public class RecordStateInvalidDefaultThrowableTest {
         private static final long serialVersionUID = 1L;
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         mock = createMock(IMethods.class);
     }
@@ -43,9 +43,9 @@ public class RecordStateInvalidDefaultThrowableTest {
     public void throwNull() {
         try {
             expect(mock.throwsNothing(false)).andStubThrow(null);
-            fail("NullPointerException expected");
+            Assertions.fail("NullPointerException expected");
         } catch (NullPointerException expected) {
-            assertEquals("null cannot be thrown", expected.getMessage());
+            Assertions.assertEquals("null cannot be thrown", expected.getMessage());
         }
 
     }
@@ -54,9 +54,9 @@ public class RecordStateInvalidDefaultThrowableTest {
     public void throwCheckedExceptionWhereNoCheckedExceptionIsThrown() {
         try {
             expect(mock.throwsNothing(false)).andStubThrow(new CheckedException());
-            fail("IllegalArgumentException expected");
+            Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException expected) {
-            assertEquals("last method called on mock cannot throw " + this.getClass().getName()
+            Assertions.assertEquals("last method called on mock cannot throw " + this.getClass().getName()
                     + "$CheckedException", expected.getMessage());
         }
     }
@@ -65,9 +65,9 @@ public class RecordStateInvalidDefaultThrowableTest {
     public void throwWrongCheckedException() throws IOException {
         try {
             expect(mock.throwsIOException(0)).andStubThrow(new CheckedException());
-            fail("IllegalArgumentException expected");
+            Assertions.fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException expected) {
-            assertEquals("last method called on mock cannot throw " + this.getClass().getName()
+            Assertions.assertEquals("last method called on mock cannot throw " + this.getClass().getName()
                     + "$CheckedException", expected.getMessage());
         }
     }

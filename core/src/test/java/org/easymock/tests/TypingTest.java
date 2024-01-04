@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.easymock.IMocksControl;
 import org.easymock.MockType;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.Set;
 import static org.junit.Assert.fail;
 
 /**
- * We are making sure here that the typing here is generic friendly. Not much assertions are made, if
+ * We are making sure here that the typing here is generic friendly. No assertions are made, if
  * it's compiling we are happy.
  *
  * @author Henri Tremblay
@@ -105,7 +106,7 @@ public class TypingTest {
     public void testNonMatchingClass() {
         try {
             list = EasyMock.mock(Set.class);
-            fail("Can't cast Set to List");
+            Assertions.fail("Can't cast Set to List");
         }
         catch(ClassCastException e) {
             // Expected

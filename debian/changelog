@@ -1,3 +1,20 @@
+easymock (5.2.0-1) unstable; urgency=medium
+
+  * New upstream version 5.2.0.
+
+ -- Markus Koschany <apo@debian.org>  Wed, 13 Sep 2023 21:27:58 +0200
+
+easymock (5.1.0-1) unstable; urgency=medium
+
+  * New upstream version 5.1.0.
+  * Declare compliance with Debian Policy 4.6.2.
+  * Drop binary package libeasymock-java-doc and do not build the javadoc.
+    (Closes: #1028669)
+  * B-D on libbyte-buddy-java.
+  * Remove libcglib-java from B-D. No longer needed.
+
+ -- Markus Koschany <apo@debian.org>  Tue, 17 Jan 2023 14:36:30 +0100
+
 easymock (4.3-1) unstable; urgency=medium
 
   * New upstream version 4.3.

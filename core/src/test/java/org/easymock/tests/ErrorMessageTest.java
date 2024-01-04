@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
  */
 package org.easymock.tests;
 
-import static org.junit.Assert.*;
-
 import org.easymock.internal.ErrorMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Henri Tremblay
@@ -28,9 +27,9 @@ public class ErrorMessageTest {
     @Test
     public void testGetters() {
         ErrorMessage m = new ErrorMessage(true, "error", 3);
-        assertTrue(m.isMatching());
-        assertEquals("error", m.getMessage());
-        assertEquals(3, m.getActualCount());
+        Assertions.assertTrue(m.isMatching());
+        Assertions.assertEquals("error", m.getMessage());
+        Assertions.assertEquals(3, m.getActualCount());
     }
 
     @Test
@@ -38,7 +37,7 @@ public class ErrorMessageTest {
         StringBuilder sb = new StringBuilder(20);
         ErrorMessage m = new ErrorMessage(true, "error()", 2);
         m.appendTo(sb, 1);
-        assertEquals("\n    error(), actual: 3", sb.toString());
+        Assertions.assertEquals("\n    error(), actual: 3", sb.toString());
     }
 
     @Test
@@ -46,7 +45,7 @@ public class ErrorMessageTest {
         StringBuilder sb = new StringBuilder(20);
         ErrorMessage m = new ErrorMessage(false, "error()", 2);
         m.appendTo(sb, 0);
-        assertEquals("\n    error(), actual: 2", sb.toString());
+        Assertions.assertEquals("\n    error(), actual: 2", sb.toString());
     }
 
     @Test
@@ -54,6 +53,6 @@ public class ErrorMessageTest {
         StringBuilder sb = new StringBuilder(20);
         ErrorMessage m = new ErrorMessage(true, "error()", 2);
         m.appendTo(sb, 2);
-        assertEquals("\n    error(), actual: 2 (+1)", sb.toString());
+        Assertions.assertEquals("\n    error(), actual: 2 (+1)", sb.toString());
     }
 }

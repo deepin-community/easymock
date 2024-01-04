@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.test;
+package org.easmock.junit5;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.easymock.EasyMock.expect;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.easymock.EasyMock;
 import org.easymock.EasyMockExtension;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
@@ -28,16 +28,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class EasymockExtensionTest extends EasyMockSupport {
 
 	@Mock
-	Object mockFromAnnotation;
+	IMethods mockFromAnnotation;
 
 	@Test
 	public void mockInjection() {
-		Object mockFromMethod = EasyMock.mock(Object.class);
+		IMethods mockFromMethod = mock(IMethods.class);
+        expect(mockFromMethod.result()).andReturn(4);
+        expect(mockFromAnnotation.result()).andReturn(8);
 
 		replayAll();
 
-		assertEquals(mockFromMethod.getClass(), mockFromAnnotation.getClass(),
-				"Expected annotation driven mock injection to work with JUnit 5");
+        assertEquals(4, mockFromMethod.result());
+        assertEquals(8, mockFromAnnotation.result());
 
 		verifyAll();
 	}
