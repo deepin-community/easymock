@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ import org.easymock.IArgumentMatcher;
 import org.easymock.LogicalOperator;
 
 /**
- * @param <T>
- *            Type of the values compared
- * 
+ * Matches if the argument, when compared (<code>Comparator.compare()</code>), agrees with the logical operator.
+ *
+ * @param <T> type of the values compared
+ *
  * @author Henri Tremblay
  */
 public class Compare<T> implements IArgumentMatcher, Serializable {
@@ -43,11 +44,13 @@ public class Compare<T> implements IArgumentMatcher, Serializable {
         this.operator = result;
     }
 
+    @Override
     public void appendTo(StringBuffer buffer) {
         buffer.append(comparator).append("(").append(expected).append(") ").append(operator.getSymbol()).append(" 0");
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public boolean matches(Object actual) {
         if (actual == null) {
             return false;

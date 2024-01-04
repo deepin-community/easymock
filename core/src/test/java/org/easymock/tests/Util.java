@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ public final class Util {
     }
 
     public static MockType getType(Object o) {
-        IMocksControl control = MocksControl.getControl(o);
-        return ((MocksControl) control).getType();
+        MocksControl control = MocksControl.getControl(o);
+        return control.getType();
     }
 
     public static String getName(Object o) {

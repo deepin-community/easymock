@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@ package org.easymock.tests;
 
 import org.easymock.IMocksControl;
 import org.easymock.MockType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.easymock.EasyMock.createNiceControl;
 import static org.easymock.EasyMock.mock;
 import static org.easymock.EasyMock.niceMock;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * @author Henri Tremblay

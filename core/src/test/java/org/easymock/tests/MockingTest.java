@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ package org.easymock.tests;
 
 import org.easymock.MockType;
 import org.easymock.internal.MocksControl;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 /**
  * Test all kind of mocking making sure the partial mocking and interface works
@@ -42,6 +42,16 @@ public class MockingTest {
         }
     }
 
+    static class PackageScopeClassToMock {
+        public int foo() {
+            return 10;
+        }
+
+        public int method() {
+            return 20;
+        }
+    }
+
     /**
      * Make sure one mock is not interacting with another
      */
@@ -51,8 +61,7 @@ public class MockingTest {
         ClassToMock transition2 = createMock(ClassToMock.class);
 
         // Should have two different callbacks
-        assertNotSame(MocksControl.getInvocationHandler(transition2),
-                MocksControl.getInvocationHandler(transition1));
+        Assertions.assertNotSame(MocksControl.getInvocationHandler(transition2), MocksControl.getInvocationHandler(transition1));
 
         transition2.foo();
         transition1.foo();
@@ -79,6 +88,16 @@ public class MockingTest {
     }
 
     @Test
+    public void testPackageScopeClassMocking() {
+        checkClassMocking(createMock(PackageScopeClassToMock.class), MockType.DEFAULT);
+    }
+
+    @Test
+    public void testMockObject() {
+        checkClassMocking(createMock(Object.class), MockType.DEFAULT);
+    }
+
+    @Test
     public void testStrictClassMocking() {
         checkClassMocking(createStrictMock(ClassToMock.class), MockType.STRICT);
     }
@@ -92,9 +111,9 @@ public class MockingTest {
     public void testMockingNull() {
         try {
             createMock(null);
-            fail("Should throw a NPE");
+            Assertions.fail("Should throw a NPE");
         } catch(NullPointerException e) {
-            assertEquals("Can't mock 'null'", e.getMessage());
+            Assertions.assertEquals("Can't mock 'null'", e.getMessage());
         }
     }
 
@@ -107,7 +126,7 @@ public class MockingTest {
     }
 
     private void checkBehavior(Object mock, MockType behavior) {
-        assertEquals(behavior, extractBehavior(mock));
+        Assertions.assertEquals(behavior, extractBehavior(mock));
     }
 
     private MockType extractBehavior(Object mock) {

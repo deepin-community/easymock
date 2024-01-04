@@ -36,3 +36,5 @@ org.droidparts.dexmaker dexmaker * * * *
 org.codehaus.mojo animal-sniffer-maven-plugin * * * *
 org.codehaus.mojo.signature java16 * * * *
 org.sonatype.plugins nexus-staging-maven-plugin * * * *
+org.apache.maven.plugins maven-source-plugin * * * *
+org.apache.maven.plugins maven-javadoc-plugin * * * *

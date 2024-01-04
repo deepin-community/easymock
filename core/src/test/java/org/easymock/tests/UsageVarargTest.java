@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  */
 package org.easymock.tests;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Proxy;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author OFFIS, Tammo Freese
@@ -30,7 +30,7 @@ public class UsageVarargTest {
 
     private IVarArgs mock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         mock = createStrictMock(IVarArgs.class);
     }
@@ -120,11 +120,11 @@ public class UsageVarargTest {
 
     @Test
     public void varargLongAccepted() {
-        mock.withVarargsLong(1, (long) 1);
+        mock.withVarargsLong(1, 1L);
         mock.withVarargsLong(1, 1, 2);
 
         replay(mock);
-        mock.withVarargsLong(1, (long) 1);
+        mock.withVarargsLong(1, 1L);
         mock.withVarargsLong(1, 1, 2);
         verify(mock);
     }

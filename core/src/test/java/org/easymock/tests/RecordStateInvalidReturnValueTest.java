@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 package org.easymock.tests;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author OFFIS, Tammo Freese
@@ -28,7 +28,7 @@ public class RecordStateInvalidReturnValueTest {
 
     private IMethods mock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         mock = createMock(IMethods.class);
     }
@@ -37,9 +37,9 @@ public class RecordStateInvalidReturnValueTest {
     public void setInvalidBooleanReturnValue() {
         try {
             expect((Object) mock.oneArg(false)).andReturn(false);
-            fail("IllegalStateException expected");
+            Assertions.fail("IllegalStateException expected");
         } catch (IllegalStateException e) {
-            assertEquals("incompatible return value type", e.getMessage());
+            Assertions.assertEquals("incompatible return value type", e.getMessage());
         }
 
     }
@@ -49,9 +49,9 @@ public class RecordStateInvalidReturnValueTest {
         mock.simpleMethod();
         try {
             expectLastCall().andReturn(null);
-            fail("IllegalStateException expected");
+            Assertions.fail("IllegalStateException expected");
         } catch (IllegalStateException e) {
-            assertEquals("void method cannot return a value", e.getMessage());
+            Assertions.assertEquals("void method cannot return a value", e.getMessage());
         }
     }
 
@@ -59,9 +59,9 @@ public class RecordStateInvalidReturnValueTest {
     public void nullForPrimitive() {
         try {
             expect(mock.longReturningMethod(4)).andReturn(null);
-            fail("null not allowed");
+            Assertions.fail("null not allowed");
         } catch (IllegalStateException e) {
-            assertEquals("can't return null for a method returning a primitive type", e.getMessage());
+            Assertions.assertEquals("can't return null for a method returning a primitive type", e.getMessage());
         }
     }
 }

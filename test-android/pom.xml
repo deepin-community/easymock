@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.easymock</groupId>
     <artifactId>easymock-parent</artifactId>
-    <version>4.3</version>
+    <version>5.2.0</version>
   </parent>
 
   <artifactId>easymock-android-tck</artifactId>
@@ -36,12 +36,6 @@
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>cglib</groupId>
-          <artifactId>cglib</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.droidparts.dexmaker</groupId>
@@ -148,7 +142,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <inherited>false</inherited>
         <executions>
           <execution>

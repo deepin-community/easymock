@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
+ * State in which a mock is recording its behavior.
+ *
  * @author OFFIS, Tammo Freese
  */
 public class RecordState implements IMocksControlState, Serializable {

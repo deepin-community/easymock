@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 package org.easymock;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.Factory;
-import org.easymock.internal.ClassProxyFactory;
 import org.easymock.internal.Injector;
 import org.easymock.internal.MockBuilder;
 import org.easymock.internal.MocksControl;
@@ -619,38 +616,38 @@ public class EasyMockSupport {
      */
     public static <T,  R extends T> Class<R> getMockedClass(T possibleMock) {
         // Check that it is a real EasyMock mock
-        if(possibleMock == null) {
-            return null;
-        }
-        if (Proxy.isProxyClass(possibleMock.getClass())) {
-            if(!(Proxy.getInvocationHandler(possibleMock) instanceof ObjectMethodsFilter)) {
-                return null;
-            }
-        }
-        else if(ReflectionUtils.isClassAvailable("net.sf.cglib.proxy.Enhancer")) {
-            if(!ObjectMockingHelper.isAClassMock(possibleMock)) {
-                return null;
-            }
-        }
-        else {
+        if (!isAMock(possibleMock)) {
             return null;
         }
         return MocksControl.getMockedClass(possibleMock);
     }
 
     /**
-     * Hides cglib classes from EasyMockSupport to prevent {@code NoClassDefFoundError} if
-     * cglib isn't used.
+     * Tells if this mock is an EasyMock mock.
+     *
+     * @param possibleMock the object that might be a mock
+     * @return true if it's a mock
+     */
+    public static boolean isAMock(Object possibleMock) {
+        if(possibleMock == null) {
+            return false;
+        }
+        if (Proxy.isProxyClass(possibleMock.getClass())) {
+            return (Proxy.getInvocationHandler(possibleMock) instanceof ObjectMethodsFilter);
+        }
+        else if(ReflectionUtils.isClassAvailable("net.bytebuddy.ByteBuddy")) {
+            return ObjectMockingHelper.isAClassMock(possibleMock);
+        }
+        return false;
+    }
+
+    /**
+     * Hides ByteBuddy classes from EasyMockSupport to prevent {@code NoClassDefFoundError} if
+     * ByteBuddy isn't used.
      */
     private static class ObjectMockingHelper {
         public static boolean isAClassMock(Object possibleMock) {
-            if(!Enhancer.isEnhanced(possibleMock.getClass())) {
-                return false;
-            }
-            if(!(possibleMock instanceof Factory)) {
-                return false;
-            }
-            return (((Factory) possibleMock).getCallback(0) instanceof ClassProxyFactory.MockMethodInterceptor);
+            return possibleMock.getClass().getSimpleName().contains("$$$EasyMock$");
         }
     }
 }

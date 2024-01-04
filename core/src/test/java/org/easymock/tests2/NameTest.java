@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 package org.easymock.tests2;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 import org.easymock.IMocksControl;
 import org.easymock.tests.IMethods;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author OFFIS, Tammo Freese
@@ -36,7 +36,7 @@ public class NameTest {
         } catch (AssertionError expected) {
             String actualMessage = expected.getMessage();
             String expectedMessage = "\n  Expectation failure on verify:\n    mock.simpleMethod(): expected: 1, actual: 0";
-            assertEquals(expectedMessage, actualMessage);
+            Assertions.assertEquals(expectedMessage, actualMessage);
         }
     }
 
@@ -50,7 +50,7 @@ public class NameTest {
         } catch (AssertionError expected) {
             String actualMessage = expected.getMessage();
             String expectedMessage = "\n  Expectation failure on verify:\n    mock.simpleMethod(): expected: 1, actual: 0";
-            assertEquals(expectedMessage, actualMessage);
+            Assertions.assertEquals(expectedMessage, actualMessage);
         }
     }
 
@@ -64,7 +64,7 @@ public class NameTest {
         } catch (AssertionError expected) {
             String actualMessage = expected.getMessage();
             String expectedMessage = "\n  Expectation failure on verify:\n    mock.simpleMethod(): expected: 1, actual: 0";
-            assertEquals(expectedMessage, actualMessage);
+            Assertions.assertEquals(expectedMessage, actualMessage);
         }
     }
 
@@ -79,17 +79,7 @@ public class NameTest {
         } catch (AssertionError expected) {
             String actualMessage = expected.getMessage();
             String expectedMessage = "\n  Expectation failure on verify:\n    mock.simpleMethod(): expected: 1, actual: 0";
-            assertEquals(expectedMessage, actualMessage);
-        }
-    }
-
-    @Test
-    public void shouldThrowIllegalArgumentExceptionIfNameIsNoValidJavaIdentifier() {
-        try {
-            createMock("no-valid-java-identifier", IMethods.class);
-            throw new AssertionError();
-        } catch (IllegalArgumentException expected) {
-            assertEquals("'no-valid-java-identifier' is not a valid Java identifier.", expected.getMessage());
+            Assertions.assertEquals(expectedMessage, actualMessage);
         }
     }
 
