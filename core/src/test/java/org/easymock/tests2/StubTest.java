@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 package org.easymock.tests2;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 import org.easymock.tests.IMethods;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author OFFIS, Tammo Freese
@@ -28,7 +28,7 @@ import org.junit.Test;
 public class StubTest {
     private IMethods mock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         mock = createStrictMock(IMethods.class);
     }
@@ -63,19 +63,19 @@ public class StubTest {
 
         replay(mock);
 
-        assertEquals("A", mock.oneArg("1"));
-        assertEquals("B", mock.oneArg("1"));
-        assertEquals("B", mock.oneArg("1"));
+        Assertions.assertEquals("A", mock.oneArg("1"));
+        Assertions.assertEquals("B", mock.oneArg("1"));
+        Assertions.assertEquals("B", mock.oneArg("1"));
         try {
             mock.oneArg("2");
         } catch (IllegalArgumentException ignored) {
         }
-        assertEquals("B", mock.oneArg("1"));
+        Assertions.assertEquals("B", mock.oneArg("1"));
         try {
             mock.oneArg("2");
         } catch (IllegalStateException ignored) {
         }
-        assertEquals("B", mock.oneArg("1"));
+        Assertions.assertEquals("B", mock.oneArg("1"));
         try {
             mock.oneArg("2");
         } catch (IllegalStateException ignored) {

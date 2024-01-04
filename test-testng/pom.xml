@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.easymock</groupId>
     <artifactId>easymock-parent</artifactId>
-    <version>4.3</version>
+    <version>5.2.0</version>
   </parent>
 
   <artifactId>easymock-test-testng</artifactId>
@@ -50,7 +50,7 @@
           <dependency>
             <groupId>org.apache.maven.surefire</groupId>
             <artifactId>surefire-testng</artifactId>
-            <version>3.0.0-M5</version>
+            <version>3.1.2</version>
           </dependency>
         </dependencies>
         <configuration>

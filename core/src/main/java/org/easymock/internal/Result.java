@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * The result of an invocation on a mock. It can be a direct constant or the result of some computation.
+ *
  * @author OFFIS, Tammo Freese
  */
 public final class Result implements IAnswer<Object>, Serializable {

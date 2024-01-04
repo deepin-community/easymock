@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.easymock.internal;
 
 import org.easymock.ConstructorArgs;
 import org.easymock.EasyMock;
+import org.easymock.EasyMockSupport;
 import org.easymock.IAnswer;
 import org.easymock.IExpectationSetters;
 import org.easymock.IMocksControl;
@@ -30,6 +31,8 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
+ * Controls all the mocks created by {@link EasyMock}. It contains the state of the mocks.
+ *
  * @author OFFIS, Tammo Freese
  */
 public class MocksControl implements IMocksControl, IExpectationSetters<Object>, Serializable {
@@ -160,13 +163,12 @@ public class MocksControl implements IMocksControl, IExpectationSetters<Object>,
     }
 
     public static MocksControl getControl(Object mock) {
-        try {
-            IProxyFactory factory = getProxyFactory(mock);
-            ObjectMethodsFilter handler = (ObjectMethodsFilter) factory.getInvocationHandler(mock);
-            return handler.getDelegate().getControl();
-        } catch (ClassCastException e) {
+        if (!EasyMockSupport.isAMock(mock)) {
             throw new IllegalArgumentException("Not a mock: " + mock.getClass().getName());
         }
+        IProxyFactory factory = getProxyFactory(mock);
+        ObjectMethodsFilter handler = (ObjectMethodsFilter) factory.getInvocationHandler(mock);
+        return handler.getDelegate().getControl();
     }
 
     public static InvocationHandler getInvocationHandler(Object mock) {

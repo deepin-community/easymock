@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.lang.reflect.Modifier;
 import java.util.function.Predicate;
 
 /**
+ * The filter catching all calls to the mock. It handles <code>equals</code>, <code>hashCode</code>, <code>toString</code>,
+ * and <code>finalize</code> in a special way. Then, for other calls, it delegates to the mock handler.
+ *
  * @author OFFIS, Tammo Freese
  * @author Henri Tremblay
  */
@@ -45,11 +48,6 @@ public class ObjectMethodsFilter implements InvocationHandler, Serializable {
     private final String name;
 
     public ObjectMethodsFilter(Class<?> toMock, MockInvocationHandler delegate, String name) {
-        if (name != null && !Invocation.isJavaIdentifier(name)) {
-            throw new IllegalArgumentException(String.format("'%s' is not a valid Java identifier.", name));
-
-        }
-
         if (toMock.isInterface()) {
             equalsMethod = ReflectionUtils.OBJECT_EQUALS;
             hashCodeMethod = ReflectionUtils.OBJECT_HASHCODE;

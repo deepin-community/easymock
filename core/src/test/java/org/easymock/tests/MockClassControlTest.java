@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 package org.easymock.tests;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests of MockClassControl basic functionalities
- * 
+ *
  * @author Henri Tremblay
  * @author OFFIS, Tammo Freese
  */
@@ -79,11 +79,11 @@ public class MockClassControlTest {
 
     private Object mock;
 
-    @Before
+    @BeforeEach
     public void setUp() {
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         mock = null;
     }
@@ -107,9 +107,9 @@ public class MockClassControlTest {
      */
     private void testEquals(Class<?> toMock) {
         initMock(toMock);
-        assertEquals(mock, mock);
+        Assertions.assertEquals(mock, mock);
         replay(mock);
-        assertEquals(mock, mock);
+        Assertions.assertEquals(mock, mock);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class MockClassControlTest {
         initMock(toMock);
         int code = mock.hashCode();
         replay(mock);
-        assertEquals(code, mock.hashCode());
+        Assertions.assertEquals(code, mock.hashCode());
     }
 
     @Test
@@ -154,9 +154,9 @@ public class MockClassControlTest {
     private void testToString(Class<?> toMock) {
         initMock(toMock);
         String expectedValue = "EasyMock for " + toMock.toString();
-        assertEquals(expectedValue, mock.toString());
+        Assertions.assertEquals(expectedValue, mock.toString());
         replay(mock);
-        assertEquals(expectedValue, mock.toString());
+        Assertions.assertEquals(expectedValue, mock.toString());
     }
 
     @Test

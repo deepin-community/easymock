@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.Serializable;
 import org.easymock.IArgumentMatcher;
 
 /**
+ * Matches if the argument is an instance of the given class.
+ *
  * @author OFFIS, Tammo Freese
  */
 public class InstanceOf implements IArgumentMatcher, Serializable {
@@ -32,10 +34,12 @@ public class InstanceOf implements IArgumentMatcher, Serializable {
         this.clazz = clazz;
     }
 
+    @Override
     public boolean matches(Object actual) {
         return (actual != null) && clazz.isAssignableFrom(actual.getClass());
     }
 
+    @Override
     public void appendTo(StringBuffer buffer) {
         buffer.append("isA(").append(clazz.getName()).append(")");
     }

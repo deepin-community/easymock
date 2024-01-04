@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.easymock</groupId>
     <artifactId>easymock-parent</artifactId>
-    <version>4.3</version>
+    <version>5.2.0</version>
   </parent>
 
   <artifactId>easymock</artifactId>
@@ -33,29 +33,23 @@
   <dependencies>
     <!-- Used for class mocking -->
     <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib</artifactId>
-      <version>3.3.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.ant</groupId>
-          <artifactId>ant</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>1.14.7</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm</artifactId>
-      <version>9.1</version>
+      <version>9.5</version>
       <scope>runtime</scope>
     </dependency>
     <!-- Used for class mocking -->
     <dependency>
       <groupId>org.objenesis</groupId>
       <artifactId>objenesis</artifactId>
-      <version>3.2</version>
+      <version>3.3</version>
     </dependency>
-    <!-- Used for class mocking on Android (cglib replacement) -->
+    <!-- Used for class mocking on Android -->
     <dependency>
         <groupId>org.droidparts.dexmaker</groupId>
         <artifactId>dexmaker</artifactId>
@@ -118,8 +112,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.easymock.internal.*;poweruser=true;mandatory:=poweruser,org.easymock,org.easymock.cglib.core,org.easymock.cglib.proxy,org.easymock.cglib.reflect,org.easymock.asm</Export-Package>
-            <Import-Package>org.easymock,org.easymock.internal;poweruser=true,org.easymock.cglib.core,org.easymock.cglib.proxy,org.easymock.cglib.reflect,org.easymock.asm,org.objenesis;resolution:=optional</Import-Package>
+            <Export-Package>org.easymock.internal.*;poweruser=true;mandatory:=poweruser,org.easymock,org.easymock.bytebuddy,org.easymock.asm</Export-Package>
+            <Import-Package>org.easymock,org.easymock.internal;poweruser=true,  org.easymock.bytebuddy,org.easymock.asm,org.objenesis;resolution:=optional</Import-Package>
           </instructions>
         </configuration>
         <executions>
@@ -132,12 +126,33 @@
           </execution>
         </executions>
       </plugin>
+      <!-- source plugin needs to be before the shade plugin so shade will pick up the sources before adding the shaded ones -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <executions>
           <execution>
-            <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
@@ -154,8 +169,8 @@
               </artifactSet>
               <relocations>
                 <relocation>
-                  <pattern>net.sf.cglib</pattern>
-                  <shadedPattern>org.easymock.cglib</shadedPattern>
+                  <pattern>net.bytebuddy</pattern>
+                  <shadedPattern>org.easymock.bytebuddy</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>org.objectweb.asm</pattern>
@@ -173,7 +188,7 @@
             <!-- Force junit provider because surefire will choose the testng one if testng is detected -->
             <groupId>org.apache.maven.surefire</groupId>
             <artifactId>surefire-junit-platform</artifactId>
-            <version>3.0.0-M5</version>
+            <version>3.1.2</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -186,6 +201,9 @@
             <artifactId>java18</artifactId>
             <version>1.0</version>
           </signature>
+          <annotations>
+            <annotation>org.easymock.internal.IgnoreAnimalSniffer</annotation>
+          </annotations>
         </configuration>
         <executions>
           <execution>
@@ -218,7 +236,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.6.0</version>
             <executions>
               <execution>
                 <id>easymock-bundle</id>

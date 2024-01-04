@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package org.easymock.tests;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * @author OFFIS, Tammo Freese
@@ -30,7 +32,7 @@ public class UsageThrowableTest {
 
     private IMethods mock;
 
-    @Before
+    @BeforeEach
     public void setup() {
         mock = createMock(IMethods.class);
     }
@@ -79,12 +81,8 @@ public class UsageThrowableTest {
 
         replay(mock);
 
-        try {
-            mock.throwsNothing(false);
-            fail("Throwable expected");
-        } catch (Throwable expected) {
-            assertSame(throwable, expected);
-        }
+        Throwable expected = assertThrows(Throwable.class, () -> mock.throwsNothing(false));
+        assertSame(throwable, expected);
 
         assertEquals("true", mock.throwsNothing(true));
     }
@@ -102,25 +100,17 @@ public class UsageThrowableTest {
     }
 
     private void testThrowCheckedException(IOException expected) throws IOException {
-        try {
-            expect(mock.throwsIOException(0)).andReturn("Value 0");
-            expect(mock.throwsIOException(1)).andThrow(expected);
-            expect(mock.throwsIOException(2)).andReturn("Value 2");
-        } catch (IOException e) {
-            fail("Unexpected Exception");
-        }
+        expect(mock.throwsIOException(0)).andReturn("Value 0");
+        expect(mock.throwsIOException(1)).andThrow(expected);
+        expect(mock.throwsIOException(2)).andReturn("Value 2");
 
         replay(mock);
 
         assertEquals("Value 0", mock.throwsIOException(0));
         assertEquals("Value 2", mock.throwsIOException(2));
 
-        try {
-            mock.throwsIOException(1);
-            fail("IOException expected");
-        } catch (IOException expectedException) {
-            assertSame(expectedException, expected);
-        }
+        IOException exception = assertThrows(IOException.class, () -> mock.throwsIOException(1));
+        assertSame(exception, expected);
     }
 
     @Test
@@ -132,12 +122,8 @@ public class UsageThrowableTest {
 
         assertEquals("", mock.throwsNothing(false));
 
-        try {
-            mock.throwsNothing(false);
-            fail("RuntimeException expected");
-        } catch (RuntimeException actualException) {
-            assertSame(expectedException, actualException);
-        }
+        RuntimeException actualException = assertThrows(RuntimeException.class, () -> mock.throwsNothing(false));
+        assertSame(expectedException, actualException);
 
         verify(mock);
     }

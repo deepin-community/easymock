@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class EasyMockPropertiesTest {
     private static final File PROPERTIES_FILE = new File(isCloverBuild() ? CLOVER_PATH : NORMAL_PATH, "easymock.properties");
 
     /**
-     * Check that the test execution isn't ran by Clover. Because it it's the case, we need to generate the easymock.properties
+     * Check that the test execution isn't ran by Clover. Because if it's the case, we need to generate the easymock.properties
      * file in a different directory
      */
     private static boolean isCloverBuild() {
@@ -138,7 +138,7 @@ public class EasyMockPropertiesTest {
             assertExpectedValue("1", "easymock.a");
 
         } finally {
-            // Whatever happens, set the initial class loader back or it'll get
+            // Whatever happens, set the initial class loader back, or it'll get
             // messy
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -198,7 +198,7 @@ public class EasyMockPropertiesTest {
             }
 
         } finally {
-            // Whatever happens, set the initial class loader back or it'll get
+            // Whatever happens, set the initial class loader back, or it'll get
             // messy
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -233,7 +233,7 @@ public class EasyMockPropertiesTest {
             assertExpectedValue(null, "easymock.a");
 
         } finally {
-            // Whatever happens, set the initial class loader back or it'll get
+            // Whatever happens, set the initial class loader back, or it'll get
             // messy
             Thread.currentThread().setContextClassLoader(old);
         }

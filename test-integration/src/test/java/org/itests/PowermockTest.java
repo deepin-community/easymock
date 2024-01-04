@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2021 the original author or authors.
+ * Copyright 2009-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,14 @@ import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.net.URL;
+import java.sql.Timestamp;
+
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.mock;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.powermock.api.easymock.PowerMock.*;
 
@@ -72,5 +78,10 @@ public class PowermockTest {
         assertEquals(getClass(), EasyMockSupport.getMockedClass(mock));
     }
 
+    @Test
+    public void javaSqlPackage() {
+        Timestamp t = mock(Timestamp.class);
+        assertNotNull(t);
+    }
 }
 

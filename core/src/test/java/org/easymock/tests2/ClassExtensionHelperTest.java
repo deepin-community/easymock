@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package org.easymock.tests2;
 
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.NoOp;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import org.droidparts.dexmaker.stock.ProxyBuilder;
 import org.easymock.EasyMock;
 import org.easymock.internal.AndroidSupport;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -29,7 +29,10 @@ import java.util.List;
 
 import static org.easymock.EasyMock.*;
 import static org.easymock.internal.MocksControl.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Henri Tremblay
@@ -51,42 +54,36 @@ public class ClassExtensionHelperTest {
     }
 
     @Test
-    public void testGetControl_EnhancedButNotAMock() throws Exception {
+    public void testGetControl_ByteBuddyButNotAMock() throws Exception {
         Object o;
         if (AndroidSupport.isAndroid()) {
             o = ProxyBuilder.forClass(ArrayList.class)
                     .handler(NOOP_INVOCATION_HANDLER)
                     .build();
         } else {
-            o = Enhancer.create(ArrayList.class, NoOp.INSTANCE);
+            o = new ByteBuddy()
+                .subclass(Object.class)
+                .make()
+                .load(Object.class.getClassLoader(), new ClassLoadingStrategy.ForUnsafeInjection())
+                .getLoaded()
+                .getDeclaredConstructor().newInstance();
         }
-        try {
-            getControl(o);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("Not a mock: " + o.getClass().getName(), e.getMessage());
-        }
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> getControl(o));
+        assertEquals("Not a mock: " + o.getClass().getName(), e.getMessage());
     }
 
     @Test
     public void testGetControl_ProxyButNotMock() {
         Object o = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] { List.class },
             (proxy, method, args) -> null);
-        try {
-            getControl(o);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("Not a mock: " + o.getClass().getName(), e.getMessage());
-        }
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> getControl(o));
+        assertEquals("Not a mock: " + o.getClass().getName(), e.getMessage());
     }
 
     @Test
     public void testGetControl_NotAMock() {
-        try {
-            getControl("");
-            fail();
-        } catch (IllegalArgumentException expected) {
-        }
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> getControl(""));
+        assertEquals("Not a mock: java.lang.String", e.getMessage());
     }
 
     @Test

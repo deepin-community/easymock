@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,37 @@
  */
 package org.easymock.internal;
 
-import net.sf.cglib.core.CodeGenerationException;
-import net.sf.cglib.core.CollectionUtils;
-import net.sf.cglib.core.DefaultNamingPolicy;
-import net.sf.cglib.core.NamingPolicy;
-import net.sf.cglib.core.Predicate;
-import net.sf.cglib.core.VisibilityPredicate;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.Factory;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.TypeCache;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.modifier.SyntheticState;
+import net.bytebuddy.description.modifier.Visibility;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.dynamic.loading.ClassInjector;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.implementation.bind.annotation.AllArguments;
+import net.bytebuddy.implementation.bind.annotation.BindingPriority;
+import net.bytebuddy.implementation.bind.annotation.FieldValue;
+import net.bytebuddy.implementation.bind.annotation.Origin;
+import net.bytebuddy.implementation.bind.annotation.RuntimeType;
+import net.bytebuddy.implementation.bind.annotation.StubValue;
+import net.bytebuddy.implementation.bind.annotation.SuperCall;
+import net.bytebuddy.implementation.bind.annotation.This;
+import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 import org.easymock.ConstructorArgs;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Factory generating a mock for a class.
@@ -48,25 +54,21 @@ import java.util.Set;
  */
 public class ClassProxyFactory implements IProxyFactory {
 
-    public static class MockMethodInterceptor implements MethodInterceptor, Serializable {
+    private static final String CALLBACK_FIELD = "$callback";
+
+    public static class MockMethodInterceptor implements Serializable {
 
         private static final long serialVersionUID = -9054190871232972342L;
 
-        private final InvocationHandler handler;
-
-        private transient Set<Method> mockedMethods;
-
-        public MockMethodInterceptor(InvocationHandler handler) {
-            this.handler = handler;
-        }
-
-        public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy)
-                throws Throwable {
-
-            // We conveniently mock abstract methods be default
-            if (Modifier.isAbstract(method.getModifiers())) {
-                return handler.invoke(obj, method, args);
-            }
+        @SuppressWarnings("unused")
+        @RuntimeType
+        @BindingPriority(BindingPriority.DEFAULT * 2)
+        public static Object interceptSuperCallable(
+            @This Object obj,
+            @FieldValue(CALLBACK_FIELD) ClassMockingData mockingData,
+            @Origin Method method,
+            @AllArguments Object[] args,
+            @SuperCall(serializableProxy = true) Callable<?> superCall) throws Throwable {
 
             // Here I need to check if the fillInStackTrace was called by EasyMock inner code
             // If it's the case, just ignore the call. We ignore it for two reasons
@@ -74,7 +76,7 @@ public class ClassProxyFactory implements IProxyFactory {
             // 2- There might be some unexpected side effect in the original fillInStackTrace. So it seems more logical to ignore the call
             if (obj instanceof Throwable && method.getName().equals("fillInStackTrace")) {
                 if(isCallerMockInvocationHandlerInvoke(new Throwable())) {
-                        return obj;
+                    return obj;
                 }
             }
 
@@ -82,7 +84,7 @@ public class ClassProxyFactory implements IProxyFactory {
             // checking for mocked methods because only unbridged method are mocked
             // It also make sure the method passed to the handler is not the bridge. Normally it
             // shouldn't be necessary because bridges are never mocked so are never in the mockedMethods
-            // map. So the normal case is that is will call invokeSuper which will call the interceptor for
+            // map. So the normal case is that it will call invokeSuper which will call the interceptor for
             // the bridged method. The problem is that it doesn't happen. It looks like a cglib bug. For
             // package scoped bridges (see GenericTest), the interceptor is not called for the bridged
             // method. Not normal from my point of view.
@@ -90,67 +92,45 @@ public class ClassProxyFactory implements IProxyFactory {
                 method = BridgeMethodResolver.findBridgedMethod(method);
             }
 
-            if (mockedMethods != null && !mockedMethods.contains(method)) {
-                return proxy.invokeSuper(obj, args);
+            // mockingData can be null when a method is called by the constructor
+            // it means it's a partial mock instantiated with an explicit constructor
+            // so, we have mockingData in thread-local to cover that case
+            mockingData = mockingData(mockingData);
+            if (mockingData != null && mockingData.isMocked(method)) {
+                return mockingData.handler().invoke(obj, method, args);
             }
 
-            return handler.invoke(obj, method, args);
+            return superCall.call();
         }
 
-        public void setMockedMethods(Method... mockedMethods) {
-            this.mockedMethods = new HashSet<>(Arrays.asList(mockedMethods));
+        private static ClassMockingData mockingData(ClassMockingData mockingData) {
+            // Normal case
+            if (mockingData != null) {
+                return mockingData;
+            }
+            // Case where we are called from a constructor so the mocking data are not there yet
+            return ClassProxyFactory.currentData.get();
         }
 
-        @SuppressWarnings("unchecked")
-        private void readObject(java.io.ObjectInputStream stream) throws IOException,
-                ClassNotFoundException {
-            stream.defaultReadObject();
-            Set<MethodSerializationWrapper> methods = (Set<MethodSerializationWrapper>) stream
-                    .readObject();
-            if (methods == null) {
-                return;
-            }
+        @SuppressWarnings("unused")
+        @RuntimeType
+        public static Object interceptAbstract(
+            @This Object obj,
+            @FieldValue(CALLBACK_FIELD) ClassMockingData mockingData,
+            @StubValue Object stubValue,
+            @Origin Method method,
+            @AllArguments Object[] args)
+            throws Throwable {
 
-            mockedMethods = new HashSet<>(methods.size());
-            for (MethodSerializationWrapper m : methods) {
-                try {
-                    mockedMethods.add(m.getMethod());
-                } catch (NoSuchMethodException e) {
-                    // ///CLOVER:OFF
-                    throw new IOException(e.toString());
-                    // ///CLOVER:ON
-                }
-            }
-        }
-
-        private void writeObject(java.io.ObjectOutputStream stream) throws IOException {
-            stream.defaultWriteObject();
-
-            if (mockedMethods == null) {
-                stream.writeObject(null);
-                return;
-            }
-
-            Set<MethodSerializationWrapper> methods = new HashSet<>(
-                mockedMethods.size());
-            for (Method m : mockedMethods) {
-                methods.add(new MethodSerializationWrapper(m));
-            }
-
-            stream.writeObject(methods);
+            return mockingData.handler().invoke(obj, method, args);
         }
     }
 
-    // ///CLOVER:OFF (I don't know how to test it automatically yet)
-    private static final NamingPolicy ALLOWS_MOCKING_CLASSES_IN_SIGNED_PACKAGES = new DefaultNamingPolicy() {
-        @Override
-        public String getClassName(String prefix, String source, Object key,
-                Predicate names) {
-            return "codegen." + super.getClassName(prefix, source, key, names);
-        }
-    };
+    private static final AtomicInteger id = new AtomicInteger(0);
 
-    // ///CLOVER:ON
+    private static final ThreadLocal<ClassMockingData> currentData = new ThreadLocal<>();
+
+    private final TypeCache<Class<?>> typeCache = new TypeCache.WithInlineExpunction<>();
 
     public static boolean isCallerMockInvocationHandlerInvoke(Throwable e) {
         StackTraceElement[] elements = e.getStackTrace();
@@ -159,33 +139,33 @@ public class ClassProxyFactory implements IProxyFactory {
                 && elements[2].getMethodName().equals("invoke");
     }
 
+    @Override
     @SuppressWarnings("unchecked")
+    @IgnoreAnimalSniffer // It reports errors on MethodHandle.invoke
     public <T> T createProxy(final Class<T> toMock, InvocationHandler handler,
             Method[] mockedMethods, ConstructorArgs args) {
-        Enhancer enhancer = createEnhancer(toMock);
 
-        MockMethodInterceptor interceptor = new MockMethodInterceptor(handler);
-        if (mockedMethods != null) {
-            interceptor.setMockedMethods(mockedMethods);
-        }
-        enhancer.setCallbackType(interceptor.getClass());
+        ElementMatcher.Junction<MethodDescription> junction = ElementMatchers.any();
 
-        Class<?> mockClass;
-        try {
-            mockClass = enhancer.createClass();
-        } catch (CodeGenerationException e) {
-            // ///CLOVER:OFF (don't know how to test it automatically)
-            // Probably caused by a NoClassDefFoundError, to use two class loaders at the same time
-            // instead of the default one (which is the class to mock one)
-            // This is required by Eclipse Plug-ins, the mock class loader doesn't see
-            // cglib most of the time. Using EasyMock and the mock class loader at the same time solves this
-            LinkedClassLoader linkedClassLoader = AccessController.doPrivileged((PrivilegedAction<LinkedClassLoader>) () -> new LinkedClassLoader(toMock.getClassLoader(), ClassProxyFactory.class.getClassLoader()));
-            enhancer.setClassLoader(linkedClassLoader);
-            mockClass = enhancer.createClass();
-            // ///CLOVER:ON
-        }
+        ClassLoader classLoader = classLoader(toMock);
+        Class<?> mockClass = typeCache.findOrInsert(classLoader, toMock,  () -> {
 
-        Factory mock;
+                try (DynamicType.Unloaded<T> unloaded = new ByteBuddy()
+                    .subclass(toMock)
+                    .name(classPackage(toMock) + toMock.getSimpleName() + "$$$EasyMock$" + id.incrementAndGet())
+                    .defineField(CALLBACK_FIELD, ClassMockingData.class, SyntheticState.SYNTHETIC, Visibility.PUBLIC)
+                    .method(junction)
+                    .intercept(MethodDelegation.to(MockMethodInterceptor.class))
+                    .make()) {
+                    return unloaded
+                        .load(classLoader, classLoadingStrategy())
+                        .getLoaded();
+                }
+            });
+
+        T mock;
+
+        ClassMockingData classMockingData = new ClassMockingData(handler, mockedMethods);
 
         if (args != null) {
             // Really instantiate the class
@@ -201,8 +181,14 @@ public class ClassProxyFactory implements IProxyFactory {
             }
             try {
                 cstr.setAccessible(true); // So we can call a protected
-                // constructor
-                mock = (Factory) cstr.newInstance(args.getInitArgs());
+                // Call the constructor. The handler needs to know the mockedMethods but the callback field is not set yet
+                // So we put them in thread-local for this really special case
+                currentData.set(classMockingData);
+                try {
+                    mock = (T) cstr.newInstance(args.getInitArgs());
+                } finally {
+                    currentData.remove();
+                }
             } catch (InstantiationException | IllegalAccessException e) {
                 // ///CLOVER:OFF
                 throw new RuntimeException("Failed to instantiate mock calling constructor", e);
@@ -215,7 +201,7 @@ public class ClassProxyFactory implements IProxyFactory {
         } else {
             // Do not call any constructor
             try {
-                mock = (Factory) ClassInstantiatorFactory.getInstantiator().newInstance(mockClass);
+                mock = (T) ClassInstantiatorFactory.getInstantiator().newInstance(mockClass);
             } catch (InstantiationException e) {
                 // ///CLOVER:OFF
                 throw new RuntimeException("Fail to instantiate mock for " + toMock + " on "
@@ -224,38 +210,76 @@ public class ClassProxyFactory implements IProxyFactory {
             }
         }
 
-        mock.setCallback(0, interceptor);
-        return (T) mock;
-    }
-
-    private Enhancer createEnhancer(Class<?> toMock) {
-        // Create the mock
-        Enhancer enhancer = new Enhancer() {
-
-            /**
-             * Filter all private constructors but do not check that there are
-             * some left
-             */
-            @SuppressWarnings("rawtypes")
-            @Override
-            protected void filterConstructors(Class sc, List constructors) {
-                CollectionUtils.filter(constructors, new VisibilityPredicate(sc, true));
-            }
-        };
-        enhancer.setSuperclass(toMock);
-
-        // ///CLOVER:OFF (I don't know how to test it automatically yet)
-        // See issue ID: 2994002
-        if (toMock.getSigners() != null) {
-            enhancer.setNamingPolicy(ALLOWS_MOCKING_CLASSES_IN_SIGNED_PACKAGES);
+        MethodHandle callbackField = getCallbackSetter(mock);
+        try {
+            callbackField.invoke(mock, classMockingData);
+        } catch (Error | RuntimeException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
         }
-        // ///CLOVER:ON
 
-        return enhancer;
+        return mock;
     }
 
+    private String classPackage(Class<?> toMock) {
+        // We want to create the mock in the same class as the original class when the class is in default scope
+        if (isJdkClassOrWithoutPackage(toMock)) {
+            return "org.easymock.mocks.";
+        }
+        return  toMock.getPackage().getName() + ".";
+    }
+
+    private <T> ClassLoader classLoader(Class<T> toMock) {
+        return isJdkClassOrWithoutPackage(toMock) ? getClass().getClassLoader() : toMock.getClassLoader();
+    }
+
+    private static <T> boolean isJdkClassOrWithoutPackage(Class<T> toMock) {
+        // null class loader means we are from the bootstrap class loader, the mocks will go in another package in class loader
+        // we need to verify for null since some dynamic classes have no package
+        // and I still verify for .java, which isn't perfect but a start, for classes hacked to another class loader like PowerMock does
+        return toMock.getPackage() == null || toMock.getClassLoader() == null || toMock.getName().startsWith("java.");
+    }
+
+    private ClassLoadingStrategy<ClassLoader> classLoadingStrategy() {
+        if (ClassInjector.UsingUnsafe.isAvailable()) {
+            return new ClassLoadingStrategy.ForUnsafeInjection();
+        }
+        // I don't think this helps much. It was an attempt to help OSGi, but it doesn't work.
+        // Right now, everything is using Unsafe to we never get there
+        return ClassLoadingStrategy.UsingLookup.of(MethodHandles.lookup());
+    }
+
+    @Override
     public InvocationHandler getInvocationHandler(Object mock) {
-        Factory factory = (Factory) mock;
-        return ((MockMethodInterceptor) factory.getCallback(0)).handler;
+        return getMockingData(mock).handler();
+    }
+
+    @IgnoreAnimalSniffer
+    private static ClassMockingData getMockingData(Object mock) {
+        MethodHandle field = getCallbackGetter(mock);
+        try {
+            return (ClassMockingData) field.invoke(mock);
+        } catch (Error | RuntimeException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static MethodHandle getCallbackGetter(Object mock) {
+        try {
+            return MethodHandles.lookup().findGetter(mock.getClass(), CALLBACK_FIELD, ClassMockingData.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static MethodHandle getCallbackSetter(Object mock) {
+        try {
+            return MethodHandles.lookup().findSetter(mock.getClass(), CALLBACK_FIELD, ClassMockingData.class);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

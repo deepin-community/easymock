@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.easymock.tests2;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
-import org.easymock.ConstructorArgs;
-import org.junit.Test;
+import org.easymock.EasyMock;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import javax.swing.JTable;
 
 /**
  * @author Henri Tremblay
@@ -46,7 +48,31 @@ public class PartialMockingTest {
         protected abstract int foo();
     }
 
-    @SuppressWarnings("unchecked")
+    public static class B {
+
+        boolean called = false;
+
+        public B() {
+            called();
+        }
+
+        void called() {
+            called = true;
+        }
+    }
+
+    public static class C {
+
+        public C() {
+            called();
+        }
+
+        void called() {
+            throw new RuntimeException("failed");
+        }
+
+    }
+
     @Test
     public void testPartialMock_PublicConstructor() {
         ArrayList<String> list = createMockBuilder(ArrayList.class).withConstructor(3).createMock();
@@ -56,38 +82,56 @@ public class PartialMockingTest {
     @Test
     public void testPartialMock_ProtectedConstructor() {
         A a = createMockBuilder(A.class).withConstructor("test").createMock();
-        assertEquals("test", a.s); // make sure constructor was called
+        Assertions.assertEquals("test", a.s); // make sure constructor was called
 
         // Check that abstract method is mocked by default
         expect(a.foo()).andReturn(3);
         replay(a);
-        assertEquals(3, a.foo());
+        Assertions.assertEquals(3, a.foo());
         verify(a);
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testPartialMock_ConstructorNotFound() throws Exception {
-        Constructor<?> cstr = ArrayList.class.getConstructor(Integer.TYPE);
-        ConstructorArgs constructorArgs = new ConstructorArgs(cstr, 2.0);
-        try {
-            createMockBuilder(ArrayList.class).withConstructor(Integer.TYPE).withArgs(2.0).createMock();
-        } catch (RuntimeException e) {
-            assertEquals("Failed to find constructor for param types", e.getMessage());
-            throw e;
-        }
+    @Test
+    public void testPartialMock_ConstructorNotFound() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> createMockBuilder(ArrayList.class).withConstructor(Float.TYPE).withArgs(2.0).createMock());
+        Assertions.assertEquals("No constructor matching arguments can be found", ex.getMessage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testPartialMock_InvalidParams() throws Exception {
-        Constructor<?> cstr = ArrayList.class.getConstructor(Integer.TYPE);
-        ConstructorArgs constructorArgs = new ConstructorArgs(cstr, "test");
-        createMockBuilder(ArrayList.class).withConstructor(Integer.TYPE).withArgs("test");
+    @Test
+    public void testPartialMock_InvalidParams() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> createMockBuilder(ArrayList.class).withConstructor(Integer.TYPE).withArgs("test"));
+        Assertions.assertEquals("test isn't of type int", ex.getMessage());
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testPartialMock_ExceptionInConstructor() throws Exception {
-        Constructor<?> cstr = ArrayList.class.getConstructor(Integer.TYPE);
-        ConstructorArgs constructorArgs = new ConstructorArgs(cstr, -5);
-        createMockBuilder(ArrayList.class).withConstructor(-5).createMock();
+    @Test
+    public void testPartialMock_ExceptionInConstructor() {
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> createMockBuilder(ArrayList.class).withConstructor(-5).createMock());
+        Assertions.assertEquals("Failed to instantiate mock calling constructor: Exception in constructor", ex.getMessage());
+    }
+
+    @Test
+    public void partiallyMockedSwingComponent_which_are_in_the_javax_package() {
+        JTable table = EasyMock.partialMockBuilder(JTable.class).createMock();
+        Assertions.assertNotNull(table);
+    }
+
+    @Test
+    public void partiallyMockedSwingComponentWithConstructor_calls_real_methods_from_constructor() {
+        B b = EasyMock.partialMockBuilder(B.class)
+            .withConstructor()
+            .createMock();
+        Assertions.assertNotNull(b);
+    }
+
+    @Test
+    public void partiallyMockedSwingComponentWithConstructor_calls_mocked_methods_from_constructor() {
+        C c = EasyMock.partialMockBuilder(C.class)
+            .withConstructor()
+            .addMockedMethod("called")
+            .createMock();
+        Assertions.assertNotNull(c);
     }
 }

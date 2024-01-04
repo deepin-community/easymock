@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package org.easymock.tests;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 import java.util.AbstractList;
 
-import org.junit.Test;
-
 /**
  * Test the limitations of class mocking
- * 
+ *
  * @author Henri Tremblay
  */
 public class LimitationsTest {
@@ -47,7 +47,7 @@ public class LimitationsTest {
     public void finalClass() {
         try {
             createMock(String.class);
-            fail("Magic, we can mock a final class");
+            Assertions.fail("Magic, we can mock a final class");
         } catch (Exception e) {
         }
     }
@@ -55,7 +55,7 @@ public class LimitationsTest {
     @Test
     public void abstractClass() {
         Object o = createMock(AbstractList.class);
-        assertTrue(o instanceof AbstractList<?>);
+        Assertions.assertTrue(o instanceof AbstractList<?>);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class LimitationsTest {
 
         try {
             c.foo();
-            fail("Final method shouldn't be mocked");
+            Assertions.fail("Final method shouldn't be mocked");
         } catch (Exception e) {
         }
     }
@@ -79,7 +79,7 @@ public class LimitationsTest {
         NativeClass mock = createMock(NativeClass.class);
         expect(mock.foo()).andReturn(1);
         replay(mock);
-        assertEquals(1, mock.foo());
+        Assertions.assertEquals(1, mock.foo());
         verify(mock);
     }
 }

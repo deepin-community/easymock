@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 package org.easymock.tests2;
 
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Henri Tremblay
@@ -47,14 +46,13 @@ public class SerializationTest implements Serializable {
 
         mock = serialize(mock);
 
-        assertEquals("a", mock.get(1));
+        Assertions.assertEquals("a", mock.get(1));
 
         mock = serialize(mock);
 
         verify(mock);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testClass() throws Exception {
 
@@ -71,7 +69,7 @@ public class SerializationTest implements Serializable {
 
         mock = serialize(mock);
 
-        assertEquals("a", mock.get(1));
+        Assertions.assertEquals("a", mock.get(1));
 
         mock = serialize(mock);
 
@@ -101,8 +99,6 @@ public class SerializationTest implements Serializable {
     }
 
     @Test
-    @Ignore
-    // to code one day to make sure we can recreate a mock in another class loader
     public void testChangingClassLoader() {
 
     }

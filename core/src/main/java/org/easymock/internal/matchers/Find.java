@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.Serializable;
 import java.util.regex.Pattern;
 
 /**
+ * Matches if the argument is a string in which a regex can be found.
+ *
  * @author OFFIS, Tammo Freese
  */
 public class Find implements IArgumentMatcher, Serializable {
@@ -33,10 +35,12 @@ public class Find implements IArgumentMatcher, Serializable {
         this.regex = Pattern.compile(regex);
     }
 
+    @Override
     public boolean matches(Object actual) {
         return (actual instanceof String) && regex.matcher((String) actual).find();
     }
 
+    @Override
     public void appendTo(StringBuffer buffer) {
         buffer.append("find(\"").append(regex.pattern().replaceAll("\\\\", "\\\\\\\\")).append("\")");
     }

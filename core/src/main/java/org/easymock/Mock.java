@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2021 the original author or authors.
+ * Copyright 2001-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public @interface Mock {
     /** @return type of mock to create */
     MockType type() default MockType.DEFAULT;
 
-    /** @return name of the mock to be created */
+    /** @return name of the mock to be created. By default, it is the "EasyMock for field TypeName.fieldName */
     String name() default "";
 
     /**
